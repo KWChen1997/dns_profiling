@@ -296,7 +296,7 @@ struct dns_entry *dump_dns_data(u_char *dns_start_ptr, u_char *current_ptr, int 
 
 void update_dns_table(struct dns_entry *dns, char *qry_name) {
 	struct {
-		char name[DNS_MAX_LEN];
+		char name[DNS_DOMAIN_MAX_LEN];
 		char addr[INET_ADDRSTRLEN];
 	} data;
 	char buf[1024];
@@ -304,13 +304,13 @@ void update_dns_table(struct dns_entry *dns, char *qry_name) {
 		if(dns->dns_type == DNS_TYPE_CNAME){
 			// printf("qry_name: %s, cname: %s\n", qry_name, dns->u.type_cname.cname);
 		}
-		else if(dns->dns_type == DNS_TYPE_A || dns->dns_type == DNS_TYPE_AAAA){
+		else if(dns->dns_type == DNS_TYPE_A){
 			strncpy(data.name, qry_name, DNS_MAX_LEN);
 			strncpy(data.addr, dns->u.type_a.addr, INET_ADDRSTRLEN);
-			//printf("qry_name: %s, ip: %s\n", qry_name, dns->u.type_a.addr);
+			fprintf(stderr,"qry_name: %s, ip: %s\n", qry_name, dns->u.type_a.addr);
 			snprintf(buf,1024,"qry_name %s ip %s\n", data.name, data.addr);
-			write(STDOUT_FILENO, buf, 1024);
-			// write(STDOUT_FILENO, &data, sizeof(data));
+			//write(STDOUT_FILENO, buf, 1024);
+			write(STDOUT_FILENO, &data, sizeof(data));
 		}
 	}
 }
