@@ -111,7 +111,7 @@ void pcap_analyze(const u_int32_t caplen, const u_char *content) {
 	}
 }
 */
-void dump_dns(u_int32_t length, const u_char *message) {
+void dump_dns(u_int32_t length, const u_char *message, char *dst) {
 	struct dns_hdr *dns = (struct dns_hdr *)message;
 	u_int16_t dns_id = ntohs(dns->dns_id);
 	u_int16_t dns_flags = ntohs(dns->dns_flags);
@@ -141,7 +141,7 @@ void dump_dns(u_int32_t length, const u_char *message) {
 			if(dns == NULL) break;
 			char *qry_name = malloc(sizeof(char) * (strlen(dns->dns_name)+1));
 			strcpy(qry_name, dns->dns_name);
-			update_dns_table(dns, qry_name);
+			update_dns_table(dns, qry_name,dst);
 			current_ptr += dns->offset;
 			free_dns_entry(dns);
 			for(int j = 1 ; j < output[i].count ; j++) {
@@ -152,7 +152,7 @@ void dump_dns(u_int32_t length, const u_char *message) {
 					free(qry_name);
 					break;
 				}
-				update_dns_table(dns, qry_name);
+				update_dns_table(dns, qry_name,dst);
 				current_ptr += dns->offset;
 				free_dns_entry(dns);
 			}
@@ -294,8 +294,9 @@ struct dns_entry *dump_dns_data(u_char *dns_start_ptr, u_char *current_ptr, int 
 	return dns;
 }
 
-void update_dns_table(struct dns_entry *dns, char *qry_name) {
+void update_dns_table(struct dns_entry *dns, char *qry_name, char *dst) {
 	struct {
+		char dst[INET_ADDRSTRLEN];
 		char name[DNS_DOMAIN_MAX_LEN];
 		char addr[INET_ADDRSTRLEN];
 	} data;
@@ -305,12 +306,13 @@ void update_dns_table(struct dns_entry *dns, char *qry_name) {
 			// printf("qry_name: %s, cname: %s\n", qry_name, dns->u.type_cname.cname);
 		}
 		else if(dns->dns_type == DNS_TYPE_A){
-			strncpy(data.name, qry_name, DNS_MAX_LEN);
+			strncpy(data.name, qry_name, DNS_DOMAIN_MAX_LEN);
 			strncpy(data.addr, dns->u.type_a.addr, INET_ADDRSTRLEN);
-			fprintf(stderr,"qry_name: %s, ip: %s\n", qry_name, dns->u.type_a.addr);
-			snprintf(buf,1024,"qry_name %s ip %s\n", data.name, data.addr);
+			strncpy(data.dst, dst, INET_ADDRSTRLEN);
+			snprintf(buf,1024,"dst %s qry_name %s ip %s\n",data.dst, data.name, data.addr);
+			fprintf(stderr,"%s", buf);
 			//write(STDOUT_FILENO, buf, 1024);
-			write(STDOUT_FILENO, &data, sizeof(data));
+			//write(STDOUT_FILENO, &data, sizeof(data));
 		}
 	}
 }

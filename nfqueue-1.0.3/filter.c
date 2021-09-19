@@ -21,6 +21,7 @@ static u_int32_t print_pkt (struct nfq_data *tb)
 	struct iphdr *iph;
 	struct udphdr *udph;
 	void *dns_payload;
+	char dst[INET_ADDRSTRLEN];
 
 	ret = nfq_get_payload(tb, &data);
 	if (ret >= 0) {
@@ -29,8 +30,9 @@ static u_int32_t print_pkt (struct nfq_data *tb)
 		if(ntohs(udph->source) != 53){
 			return id;
 		}
+		snprintf(dst,INET_ADDRSTRLEN,"%u.%u.%u.%u", NIPQUAD(iph->daddr));
 		dns_payload = (void*)data + iph->ihl * 4 + 8;
-		dump_dns(ret - (dns_payload - (void*)iph), dns_payload);
+		dump_dns(ret - (dns_payload - (void*)iph), dns_payload, dst);
 	}
 
 	return id;

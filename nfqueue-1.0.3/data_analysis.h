@@ -106,9 +106,9 @@ struct dns_entry {
 	} u;
 } __attribute__((packed));
 
-void dump_dns(u_int32_t length, const u_char *message);
+void dump_dns(u_int32_t length, const u_char *message, char *dst);
 int dump_domain_name(u_char *dns_start_ptr, u_char *current_ptr, char *buf, ssize_t buf_len);
 struct dns_entry *dump_dns_data(u_char *dns_start_ptr, u_char *current_ptr, int response);
 void free_dns_entry(struct dns_entry *dns);
-void update_dns_table(struct dns_entry *dns, char *qry_name);
+void update_dns_table(struct dns_entry *dns, char *qry_name, char *dst);
 #endif
