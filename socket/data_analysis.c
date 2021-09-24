@@ -244,9 +244,10 @@ void update_dns_table(struct dns_entry *dns, char *qry_name, char *dst) {
 			strncpy(data.name, qry_name, DNS_DOMAIN_MAX_LEN);
 			strncpy(data.addr, dns->u.type_a.addr, INET_ADDRSTRLEN);
 			strncpy(data.dst, dst, INET_ADDRSTRLEN);
+			//debugging message
 			snprintf(buf,1024,"dst %s qry_name %s ip %s\n",data.dst, data.name, data.addr);
 			fprintf(stderr,"%s", buf);
-			//write(STDOUT_FILENO, buf, 1024);
+			//sending data to anom_detector
 			write(STDOUT_FILENO, &data, sizeof(data));
 		}
 	}
