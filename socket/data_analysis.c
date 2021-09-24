@@ -247,7 +247,7 @@ void update_dns_table(struct dns_entry *dns, char *qry_name, char *dst) {
 			snprintf(buf,1024,"dst %s qry_name %s ip %s\n",data.dst, data.name, data.addr);
 			fprintf(stderr,"%s", buf);
 			//write(STDOUT_FILENO, buf, 1024);
-			//write(STDOUT_FILENO, &data, sizeof(data));
+			write(STDOUT_FILENO, &data, sizeof(data));
 		}
 	}
 }

@@ -1,13 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <netinet/in.h>
-#include <linux/ip.h>
-#include <linux/udp.h>
-#include <linux/types.h>
 #include <sys/socket.h>
 
-#include <sys/mman.h>
 #include <fcntl.h>
 
 #include "data_analysis.h"
