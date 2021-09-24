@@ -12,16 +12,14 @@ struct {
 - How to use?
 	- Testing scenario
 		- sender/sender
-```sh=
+		```sh=
 		usage: sender <packet file>
-```
-	```c=
-int dump_packet(void *data, size_t data_len);
-/*
- * purpose: get the information inside the packet
- * data: the packet
- * data_len: the packet size
- * */
-	```
+		```
+			- This program will send the packet to 127.0.0.1:5960
+		- caller/caller
+		```sh=
+		usage: ./caller
+		```
+			- This program is a simple version of anomaly detector which only receives data.
 
 	
