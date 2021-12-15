@@ -18,30 +18,6 @@
 
 #include "data_analysis.h"
 /*
-void analyze(char *data_file){
-	u_char data_buf[MTU] = {0};
-	memset(data_buf, '\0', sizeof(data_buf));
-	int i = 0;
-	FILE *fptr = fopen(data_file, "rb");
-	if(!fptr){
-		perror("fopen");
-		exit(1);
-	}
-
-	for(i=0; !feof(fptr); i++)
-		fscanf(fptr, "%c", &data_buf[i]);
-	fclose(fptr);
-
-	u_int32_t caplen = i-1;
-	pcap_analyze(caplen, data_buf);
-
-	// analysis result
-	hashmap_show(&hm);
-	wrt_csv(&hm);
-	hashmap_free(&hm);
-}
-*/
-/*
 int main(int argc, char const *argv[]) {
 	char pcap_file[50];
 	int cmd_opt = 0;
@@ -66,49 +42,6 @@ int main(int argc, char const *argv[]) {
 	}
 	analyze(pcap_file);
 	return 0;
-}
-*/
-/*
-void pcap_analyze(const u_int32_t caplen, const u_char *content) {
-	struct ether_header *ethernet = (struct ether_header *)content;
-	u_int16_t type = ntohs(ethernet->ether_type);
-
-	if(type == ETHERTYPE_IP) {
-		struct ip *ip = (struct ip *)(content + ETHER_HDR_LEN);
-		struct udphdr *udp = (struct udphdr *)(content + ETHER_HDR_LEN + (ip->ip_hl << 2));
-		
-		char src_ip[INET_ADDRSTRLEN] = {0};
-		char dst_ip[INET_ADDRSTRLEN] = {0};
-		inet_ntop(AF_INET, &(ip->ip_src), src_ip, INET_ADDRSTRLEN);
-		inet_ntop(AF_INET, &(ip->ip_dst), dst_ip, INET_ADDRSTRLEN);
-
-		u_int16_t source_port = ntohs(udp->uh_sport);
-		u_int16_t destination_port = ntohs(udp->uh_dport);
-		//printf("%s(%u) -> %s(%u)\n", src_ip, source_port, dst_ip, destination_port);
-
-		u_char *message = (u_char *)(content + ETHER_HDR_LEN + (ip->ip_hl << 2) + 8);
-		u_int32_t length = caplen - ETHER_HDR_LEN - (ip->ip_hl << 2) - 8;
-		if (source_port == 53)
-			dump_dns(length, message);
-	}
-	else if(type == ETHERTYPE_IPV6) {
-		struct ip6_hdr *ip6 = (struct ip6_hdr *)(content + ETHER_HDR_LEN);
-		struct udphdr *udp = (struct udphdr *)(content + ETHER_HDR_LEN + 40);
-
-		char src_ip[INET6_ADDRSTRLEN] = {0};
-		char dst_ip[INET6_ADDRSTRLEN] = {0};
-		inet_ntop(AF_INET6, &(ip6->ip6_src), src_ip, INET6_ADDRSTRLEN);
-		inet_ntop(AF_INET6, &(ip6->ip6_dst), dst_ip, INET6_ADDRSTRLEN);
-
-		u_int16_t source_port = ntohs(udp->uh_sport);
-		u_int16_t destination_port = ntohs(udp->uh_dport);
-		//printf("%s(%u) -> %s(%u)\n", src_ip, source_port, dst_ip, destination_port);
-
-		u_char *message = (u_char *)(content + ETHER_HDR_LEN + 40 + 8);
-		u_int32_t length = caplen - ETHER_HDR_LEN - 40 - 8;
-		if (source_port == 53)
-			dump_dns(length, message);
-	}
 }
 */
 void dump_dns(u_int32_t length, const u_char *message, char *dst) {
@@ -152,7 +85,7 @@ void dump_dns(u_int32_t length, const u_char *message, char *dst) {
 					free(qry_name);
 					break;
 				}
-				update_dns_table(dns, qry_name,dst);
+				update_dns_table(dns, dns->dns_name,dst);
 				current_ptr += dns->offset;
 				free_dns_entry(dns);
 			}
@@ -166,6 +99,7 @@ void dump_dns(u_int32_t length, const u_char *message, char *dst) {
 					free_dns_entry(dns);
 					break;
 				}
+				update_dns_table(dns,dns->dns_name,dst);
 				current_ptr += dns->offset;
 				free_dns_entry(dns);
 			}
@@ -303,7 +237,7 @@ void update_dns_table(struct dns_entry *dns, char *qry_name, char *dst) {
 	char buf[1024];
 	if(dns->response) {
 		if(dns->dns_type == DNS_TYPE_CNAME){
-			// printf("qry_name: %s, cname: %s\n", qry_name, dns->u.type_cname.cname);
+			//fprintf(stderr,"qry_name: %s, cname: %s\n", qry_name, dns->u.type_cname.cname);
 		}
 		else if(dns->dns_type == DNS_TYPE_A){
 			strncpy(data.name, qry_name, DNS_DOMAIN_MAX_LEN);
